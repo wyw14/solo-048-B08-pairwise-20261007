@@ -18,9 +18,13 @@ func NewLeakProtection(detector *hydraulic.LeakDetector) *LeakProtection {
 }
 
 func (p *LeakProtection) Apply(balance hydraulic.Balance) (*hydraulic.LeakIncident, error) {
-	incident, err := p.detector.Observe(balance)
+	incident, recovered, err := p.detector.Observe(balance)
 	if err != nil {
 		return nil, fmt.Errorf("evaluate leak protection: %w", err)
+	}
+	if recovered {
+		p.Clear(balance.StationID)
+		return nil, nil
 	}
 	if incident == nil {
 		return nil, nil
