@@ -33,14 +33,14 @@ func (a *App) evaluateHydraulic(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusConflict, err)
 		return
 	}
-	incident, err := a.LeakProtection.Apply(balance)
+	incident, newlyConfirmed, err := a.LeakProtection.Apply(balance)
 	if err != nil {
 		writeError(w, http.StatusConflict, err)
 		return
 	}
 	var protectionIncident any
 	var isolationSession any
-	if incident != nil && incident.Confirmed {
+	if newlyConfirmed {
 		raised, raiseErr := a.Protection.Raise(stationID, "hydraulic_leak", "critical", "confirmed mass imbalance")
 		if raiseErr != nil {
 			writeError(w, http.StatusConflict, raiseErr)
